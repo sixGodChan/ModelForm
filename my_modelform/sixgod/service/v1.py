@@ -78,12 +78,25 @@ class BaseSixGodAdmin(object):
         else:
             # 对象继承类，类继承type
             from django.forms import ModelForm
-            # class MyModelForm(ModelForm):
-            #     class Meta:
-            #         model = self.model_class
-            #         fields = "__all__"
-            _m = type('Meta', (object,), {'model': self.model_class, 'fields': "__all__"})
-            MyModelForm = type('MyModelForm', (ModelForm,), {'Meta': _m})
+            class MyModelForm(ModelForm):
+                class Meta:
+                    model = self.model_class
+                    fields = "__all__"
+
+                # 添加class
+                def __init__(self, *args, **kwargs):
+                    super(MyModelForm, self).__init__(*args, **kwargs)
+
+                    # for example change class for integerPolje1
+                    # self.fields['integerPolje1'].widget.attrs['class'] = 'SOMECLASS'
+
+                    # you can iterate all fields here
+                    for fname, f in self.fields.items():
+                        f.widget.attrs['class'] = 'form-control'
+                # 添加class 结束
+
+            # _m = type('Meta', (object,), {'model': self.model_class, 'fields': "__all__"})
+            # MyModelForm = type('MyModelForm', (ModelForm,), {'Meta': _m})
             return MyModelForm
 
     @property
@@ -135,6 +148,18 @@ class BaseSixGodAdmin(object):
                 return redirect(list_url)
 
         context = {'form': form}
+        # from django.forms.boundfield import BoundField
+        # for item in form:
+        #     print(item)
+        #     print(item.field)
+        #     print(item)
+        #     print(item.name)
+        #     print(item.label)
+        #     print(item.errors)
+        #     print(item.data)
+        #     print(item.auto_id)
+        #     print(item.id_for_label)
+        #     print(item.initial)
         return render(request, 'sg/add.html', context)
 
     def delete_view(self, request, pk):

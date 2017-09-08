@@ -3,13 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="/static/plugins/bootstrap-3.3.7-dist/css/bootstrap.css">
 </head>
 <body>
 <h1>编辑列表</h1>
-<form method="post" novalidate>
+{#<form method="post" novalidate>#}
+{#    {% csrf_token %}#}
+{#    {{ form.as_p }}#}
+{#    <input type="submit" value="提交">#}
+{#</form>#}
+
+<form class="form-horizontal" method="post" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="提交">
+    {% for item in form %}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">{{ item.label }}</label>
+            <div class="col-sm-10">
+                {{ item }}
+            </div>
+            <label class="col-sm-2 control-label">{{ item.errors }}</label>
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input type="submit" value="提交" class="btn btn-default">
+        </div>
+    </div>
 </form>
 </body>
 </html>
