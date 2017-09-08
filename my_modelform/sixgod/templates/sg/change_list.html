@@ -1,0 +1,15 @@
+{# 使用模版自定义函数 导入模版 #}
+{% load sg_list %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>数据列表</h1>
+<a href="{{ add_url }}">添加</a>
+{# 调用函数并传参数 #}
+{% operate result_list list_display basesixgodadmin_obj %}
+</body>
+</html>
