@@ -1,5 +1,5 @@
 class PageInfo(object):
-    def __init__(self, current_page, total_row, base_url, per_page=10, show_page=11):
+    def __init__(self, current_page, total_row, base_url, page_param_dict, per_page=10, show_page=11):
         '''
 
         :param current_page: 当前页
@@ -20,10 +20,13 @@ class PageInfo(object):
         self.total_page = x
         self.show_page = show_page
         self.base_url = base_url
+        self.page_param_dict = page_param_dict
 
+    @property
     def start(self):
         return (self.current_page - 1) * self.per_page
 
+    @property
     def end(self):
         return self.current_page * self.per_page
 
@@ -52,22 +55,27 @@ class PageInfo(object):
                     begin = self.current_page - half_page
                     stop = self.current_page + half_page + 1
         if self.current_page <= 1:
-            prev = '<li><a href="#">«</a></li>'
+            prev = '<li><a href="#">«</a></li>'  # 没有上一页
         else:
-            prev = '<li><a href="%s?page=%s">«</a></li>' % (self.base_url, self.current_page - 1,)
+            self.page_param_dict['page'] = self.current_page - 1
+            prev = '<li><a href="%s?%s">«</a></li>' % (self.base_url, self.page_param_dict.urlencode(),)  # 有上一页,
+            # urlencode()可以将querydict转换为符合url的键值形式
         page_list.append(prev)
 
         for i in range(begin, stop):
+            self.page_param_dict['page'] = i
             if i == self.current_page:
-                temp = '<li class="active"><a href="%s?page=%s">%s</a></li>' % (self.base_url, i, i)
+                temp = '<li class="active"><a href="%s?%s">%s</a></li>' % (
+                self.base_url, self.page_param_dict.urlencode(), i)
             else:
-                temp = '<li><a href="%s?page=%s">%s</a></li>' % (self.base_url, i, i)
+                temp = '<li><a href="%s?%s">%s</a></li>' % (self.base_url, self.page_param_dict.urlencode(), i)
             page_list.append(temp)
 
         if self.current_page >= self.total_page:
-            nex = '<li><a href="#">»</a></li>'
+            nex = '<li><a href="#">»</a></li>'  # 没有下一页
         else:
-            nex = '<li><a href="%s?page=%s">»</a></li>' % (self.base_url, self.current_page + 1,)
+            self.page_param_dict['page'] = self.current_page + 1
+            nex = '<li><a href="%s?%s">»</a></li>' % (self.base_url, self.page_param_dict.urlencode(),)  # 有下一页
         page_list.append(nex)
 
         return ''.join(page_list)

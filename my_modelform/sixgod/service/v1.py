@@ -53,6 +53,8 @@
 
 from django.shortcuts import render, HttpResponse, redirect
 from django.shortcuts import reverse
+from utils.pager import PageInfo
+import copy
 
 
 class BaseSixGodAdmin(object):
@@ -113,7 +115,21 @@ class BaseSixGodAdmin(object):
         return urlpatterns
 
     def changelist_view(self, request):
-        result_list = self.model_class.objects.all()
+        # result_list = self.model_class.objects.all()
+
+        # 分页
+        condition = {}
+        base_list_url = reverse('{0}:{1}_{2}_changelist'.format(self.site.namespace, self.app_label,
+                                                                self.model_name))
+        # utl_path = request.path_info
+        total_row = self.model_class.objects.filter(**condition).count()
+
+        page_param_dict = copy.deepcopy(request.GET)  # 保持url其他参数，深拷贝request.GET，防止以后使用对其有影响
+        page_param_dict._mutable = True  # querydict默认不可修改，_mutable=True可以修改
+
+        page_info = PageInfo(request.GET.get('page'), total_row, base_list_url, page_param_dict)
+        result_list = self.model_class.objects.filter(**condition)[page_info.start:page_info.end]
+        # 分页 结束
 
         # 生成添加按钮
         from django.http.request import QueryDict
@@ -130,7 +146,8 @@ class BaseSixGodAdmin(object):
             'result_list': result_list,  # QuerySet对象
             'list_display': self.list_display,  # 要显示的字段
             'basesixgodadmin_obj': self,
-            'add_url': add_url
+            'add_url': add_url,
+            'page_info': page_info
         }
         return render(request, 'sg/change_list.html', context)
 
