@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<select id="ugID" >
+    {% for i in form %}
+        <option value="{{ i.id }}">{{ i.title }}</option>
+    {% endfor %}
+</select>
+<a href="#" onclick="popupUrl('/add_test/?popup=ugID')">添加</a>
+<script>
+    function popupUrl(url) {
+        window.open(url, 'x1', 'status=1,height:500,width:500,toolbar=0,resizeable=0');
+    }
+    function popupCallBack1(popid, opid, optext) {
+        var tag = document.createElement('option');
+        tag.innerHTML = optext;
+        tag.setAttribute('value', opid);
+        tag.setAttribute('selected', 'selected');
+        document.getElementById(popid).appendChild(tag);
+    }
+</script>
+</body>
+</html>

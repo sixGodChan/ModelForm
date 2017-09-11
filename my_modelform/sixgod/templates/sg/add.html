@@ -1,3 +1,5 @@
+{% load sg_form %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,28 +9,7 @@
 </head>
 <body>
 <h1>添加列表</h1>
-{#<form method="post" novalidate>#}
-{#    {% csrf_token %}#}
-{#    {{ form.as_p }}#}
-{#    <input type="submit" value="提交" class="btn btn-default">#}
-{#</form>#}
+{% show_add_edit_form form %}
 
-<form class="form-horizontal" method="post" novalidate>
-    {% csrf_token %}
-    {% for item in form %}
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{ item.label }}</label>
-            <div class="col-sm-10">
-                {{ item }}
-            </div>
-            <label class="col-sm-2 control-label">{{ item.errors }}</label>
-        </div>
-    {% endfor %}
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <input type="submit" value="提交" class="btn btn-default">
-        </div>
-    </div>
-</form>
 </body>
 </html>

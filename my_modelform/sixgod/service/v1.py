@@ -93,7 +93,7 @@ class BaseSixGodAdmin(object):
                     # you can iterate all fields here
                     for fname, f in self.fields.items():
                         f.widget.attrs['class'] = 'form-control'
-                # 添加class 结束
+                        # 添加class 结束
 
             # _m = type('Meta', (object,), {'model': self.model_class, 'fields': "__all__"})
             # MyModelForm = type('MyModelForm', (ModelForm,), {'Meta': _m})
@@ -140,26 +140,23 @@ class BaseSixGodAdmin(object):
         else:
             form = self.get_add_or_edit_model_form()(data=request.POST, files=request.FILES)
             if form.is_valid():
-                form.save()
+                obj = form.save()
 
-                base_list_url = reverse(
-                    '{2}:{0}_{1}_changelist'.format(self.app_label, self.model_name, self.site.namespace))
-                list_url = '{0}?{1}'.format(base_list_url, request.GET.get('_changelistfilter'))
-                return redirect(list_url)
+                popid = request.GET.get('popup')
+                if popid:
+                    context_dict = {'data_dict': {
+                        'pk': obj.pk,
+                        'text': str(obj),
+                        'popid': popid
+                    }}
+                    return render(request, 'sg/popup_response.html', context_dict)
+                else:
+                    base_list_url = reverse(
+                        '{2}:{0}_{1}_changelist'.format(self.app_label, self.model_name, self.site.namespace))
+                    list_url = '{0}?{1}'.format(base_list_url, request.GET.get('_changelistfilter'))
+                    return redirect(list_url)
 
         context = {'form': form}
-        # from django.forms.boundfield import BoundField
-        # for item in form:
-        #     print(item)
-        #     print(item.field)
-        #     print(item)
-        #     print(item.name)
-        #     print(item.label)
-        #     print(item.errors)
-        #     print(item.data)
-        #     print(item.auto_id)
-        #     print(item.id_for_label)
-        #     print(item.initial)
         return render(request, 'sg/add.html', context)
 
     def delete_view(self, request, pk):

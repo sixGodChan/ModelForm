@@ -22,4 +22,5 @@ urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^sg/', v1.site.urls),  # 调用v1.site.urls方法
     url(r'^test/', views.test),
+    url(r'^add_test/', views.add_test),
 ]

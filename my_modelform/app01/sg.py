@@ -59,3 +59,5 @@ class RoleBSGA(v1.BaseSixGodAdmin):
 
 
 v1.site.register(models.Role)
+
+v1.site.register(models.UserGroup)
