@@ -20,3 +20,15 @@ class UserInfo(models.Model):
     email = models.CharField(max_length=32, verbose_name='邮箱')
     ug = models.ForeignKey(UserGroup, verbose_name='科室')
     m2m = models.ManyToManyField(Role, verbose_name='角色')
+
+    def text_username(self):
+        return self.username
+
+    def value_username(self):
+        return self.username
+
+    def text_email(self):
+        return self.email
+
+    def value_email(self):
+        return self.email

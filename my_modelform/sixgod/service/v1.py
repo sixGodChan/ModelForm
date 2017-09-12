@@ -53,7 +53,7 @@
 
 from django.shortcuts import render, HttpResponse, redirect
 from django.shortcuts import reverse
-from utils.pager import PageInfo
+from sixgod.utils.pager import PageInfo
 import copy
 
 
@@ -61,6 +61,10 @@ class BaseSixGodAdmin(object):
     list_display = "__all__"
 
     add_or_edit_model_form = None
+
+    action_list = []
+
+    filter_list = []
 
     def __init__(self, model_class, site):
         self.model_class = model_class
@@ -84,6 +88,8 @@ class BaseSixGodAdmin(object):
                 class Meta:
                     model = self.model_class
                     fields = "__all__"
+                    error_messages = {'username': {'required': '不可为空'}, 'email': {'required': '不可为空'},
+                                      'ug': {'required': '不可为空'}, 'm2m': {'required': '不可为空'}, }
 
                 # 添加class
                 def __init__(self, *args, **kwargs):
@@ -117,6 +123,18 @@ class BaseSixGodAdmin(object):
     def changelist_view(self, request):
         # result_list = self.model_class.objects.all()
 
+        # 生成添加按钮
+        from django.http.request import QueryDict
+        param_dict = QueryDict(mutable=True)
+        if request.GET:
+            param_dict['_changelistfilter'] = request.GET.urlencode()
+            # 拼接参数
+        base_add_url = reverse('{0}:{1}_{2}_add'.format(self.site.namespace, self.app_label,
+                                                        self.model_name))
+        add_url = '{0}?{1}'.format(base_add_url, param_dict.urlencode())
+        self.request = request  # request传入self
+        # 生成添加按钮 结束
+
         # 分页
         condition = {}
         base_list_url = reverse('{0}:{1}_{2}_changelist'.format(self.site.namespace, self.app_label,
@@ -131,23 +149,50 @@ class BaseSixGodAdmin(object):
         result_list = self.model_class.objects.filter(**condition)[page_info.start:page_info.end]
         # 分页 结束
 
-        # 生成添加按钮
-        from django.http.request import QueryDict
-        param_dict = QueryDict(mutable=True)
-        if request.GET:
-            param_dict['_changelistfilter'] = request.GET.urlencode()
-            # 拼接参数
-        base_add_url = reverse('{0}:{1}_{2}_add'.format(self.site.namespace, self.app_label,
-                                                        self.model_name))
-        add_url = '{0}?{1}'.format(base_add_url, param_dict.urlencode())
+        # action操作
+        action_list = []
+        for item in self.action_list:
+            tpl = {'name': item.__name__, 'text': item.text}
+            action_list.append(tpl)
 
-        self.request = request  # request传入self
+        if request.method == "POST":
+            action_name_str = request.POST.get('action')
+            ret = getattr(self, action_name_str)(request)
+
+            action_list_url = reverse('{0}:{1}_{2}_changelist'.format(self.site.namespace, self.app_label,
+                                                                      self.model_name))
+            if ret:
+                action_list_url = '{0}?{1}'.format(action_list_url, request.GET.urlencode())
+
+            return redirect(action_list_url)
+        # action操作 结束
+
+        # 组合查询
+        from sixgod.utils.filter_code import FilterList
+        filter_list = []
+        for option in self.filter_list:
+            if option.is_func:
+                data_list = option.field_or_func(self, option, request)
+            else:
+                from django.db.models import ForeignKey, ManyToManyField, OneToOneField
+                field = self.model_class._meta.get_field(option.field_or_func)
+                if isinstance(field, ForeignKey):
+                    data_list = FilterList(option, field.rel.model.objects.all(), request)
+                elif isinstance(field, ManyToManyField):
+                    data_list = FilterList(option, field.rel.model.objects.all(), request)
+                else:
+                    data_list = FilterList(option, field.model.objects.all(), request)
+            filter_list.append(data_list)
+        # 组合查询 结束
+
         context = {
             'result_list': result_list,  # QuerySet对象
             'list_display': self.list_display,  # 要显示的字段
             'basesixgodadmin_obj': self,
             'add_url': add_url,
-            'page_info': page_info
+            'page_info': page_info,
+            'action_list': action_list,
+            'filter_list': filter_list
         }
         return render(request, 'sg/change_list.html', context)
 

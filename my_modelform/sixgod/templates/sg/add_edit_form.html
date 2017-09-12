@@ -10,7 +10,7 @@
                 <div class="col-sm-1">
                     <a href="#" onclick="popupUrl('{{ col.popup_url }}')">添加</a>
                 </div>
-                <label class="col-sm-2 control-label">{{ col.item.errors.0 }}</label>
+                <label class="col-sm-2 control-label" style="color: red">{{ col.item.errors.0 }}</label>
             </div>
         {% else %}
             <div class="form-group">
@@ -20,7 +20,7 @@
                 </div>
                 <div class="col-sm-1">
                 </div>
-                <label class="col-sm-2 control-label">{{ col.item.errors.0 }}</label>
+                <label class="col-sm-2 control-label" style="color: red">{{ col.item.errors.0 }}</label>
             </div>
         {% endif %}
 

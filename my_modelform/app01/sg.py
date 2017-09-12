@@ -28,7 +28,7 @@ class UserInfoBSGA(v1.BaseSixGodAdmin):  # UserInfoBSGA类 继承BaseSixGodAdmin
         if is_header:
             return mark_safe('<input type="checkbox"/>')
         else:
-            tag = '<input type="checkbox" value="{0}"/>'.format(obj.pk)
+            tag = '<input name="pk" type="checkbox" value="{0}"/>'.format(obj.pk)
             return mark_safe(tag)
 
     def delete(self, obj=None, is_header=False):
@@ -48,6 +48,36 @@ class UserInfoBSGA(v1.BaseSixGodAdmin):  # UserInfoBSGA类 继承BaseSixGodAdmin
             return mark_safe(tag)
 
     list_display = [checkbox, 'id', 'username', 'email', change, delete]
+
+    def initial(self, request):
+        pk_list = request.POST.getlist('pk')
+        models.UserInfo.objects.filter(pk__in=pk_list).update(username='雎鸠')
+        return True
+
+    initial.text = '初始化'
+
+    def multi_del(self, request):
+        pk_list = request.POST.getlist('pk')
+        models.UserInfo.objects.filter(pk__in=pk_list).delete()
+        return True
+
+    multi_del.text = '批量删除'
+
+    action_list = [initial, multi_del]
+
+    from sixgod.utils.filter_code import FilterOption
+
+    def email(self, option, request):
+        from sixgod.utils.filter_code import FilterList
+        queryset = models.UserInfo.objects.filter(id__gt=2)
+        return FilterList(option, queryset, request)
+
+    filter_list = [
+        FilterOption('username', False, text_func_name='text_username', val_func_name='value_username'),
+        FilterOption(email, False, text_func_name='text_email', val_func_name='value_email'),
+        FilterOption('ug', True),
+        FilterOption('m2m', False)
+    ]
 
 
 v1.site.register(models.UserInfo, UserInfoBSGA)  # 调用v1.site.register方法
