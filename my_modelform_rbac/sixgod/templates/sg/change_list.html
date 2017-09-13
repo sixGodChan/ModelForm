@@ -1,0 +1,79 @@
+{# 使用模版自定义函数 导入模版 #}
+{% extends 'sg/layout.html' %}
+{% load sg_list %}
+
+{% block css %}
+    <style>
+        .comb-search a {
+            display: inline-block;
+            border: 1px solid #dddddd;
+            padding: 5px 8px;
+            margin: 5px;
+        }
+
+        .comb-search a.active {
+            background-color: #2aabd2;
+            color: white;
+        }
+
+        .comb-search .all-area {
+            float: left;
+        }
+
+        .comb-search .others-area {
+            padding-left: 70px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>数据列表</h1>
+        {% if filter_list %}
+            <div class="row comb-search">
+                <h3>组合搜索</h3>
+                {% for queryset in filter_list %}
+                    <div class="row">
+                        {% for row in queryset %}
+                            {{ row }}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% if action_list %}
+                <select name="action">
+                    {% for item in action_list %}
+                        <option value="{{ item.name }}">{{ item.text }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            <input type="submit" value="执行" class="btn btn-primary">
+            {% csrf_token %}
+            <a href="{{ add_url }}" class="btn btn-success" style="float: right">添加</a>
+            {# 调用函数并传参数 #}
+            {% operate result_list list_display basesixgodadmin_obj %}
+        </form>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {{ page_info.pager|safe }}
+                {#        html调用函数不需要加括号pager(),浏览器信任插入字符串safe#}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#headCheckBox').click(function () {
+                $(this).parent().parent().parent().next().find(':checkbox').prop('checked', $(this).prop('checked'));
+            })
+
+        })
+
+    </script>
+{% endblock %}

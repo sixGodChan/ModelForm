@@ -1,0 +1,46 @@
+<form class="form-horizontal" method="post" novalidate>
+    {% csrf_token %}
+    {% for col in form %}
+        {% if col.is_popup %}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">{{ col.item.label }}</label>
+                <div class="col-sm-5">
+                    {{ col.item }}
+                </div>
+                <div class="col-sm-1">
+                    <a href="#" onclick="popupUrl('{{ col.popup_url }}')">添加</a>
+                </div>
+                <label class="col-sm-2 control-label" style="color: red">{{ col.item.errors.0 }}</label>
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">{{ col.item.label }}</label>
+                <div class="col-sm-5">
+                    {{ col.item }}
+                </div>
+                <div class="col-sm-1">
+                </div>
+                <label class="col-sm-2 control-label" style="color: red">{{ col.item.errors.0 }}</label>
+            </div>
+        {% endif %}
+
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input type="submit" value="提交" class="btn btn-default">
+        </div>
+    </div>
+</form>
+
+<script>
+    function popupUrl(url) {
+        window.open(url, url, 'status=1,height:400,width:300,toolbar=0,resizeable=0');
+    }
+    function popupCallBack(data_dict) {
+        var tag = document.createElement('option');
+        tag.innerHTML = data_dict.text;
+        tag.setAttribute('value', data_dict.id);
+        tag.setAttribute('selected', 'selected');
+        document.getElementById(data_dict.popid).appendChild(tag);
+    }
+</script>
