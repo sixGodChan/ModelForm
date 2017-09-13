@@ -137,6 +137,13 @@ class BaseSixGodAdmin(object):
 
         # 分页
         condition = {}
+        field_list = [item.name for item in self.model_class._meta._get_fields()]
+        for k in request.GET:
+            if k not in field_list:
+                # raise Exception('条件查询字段%s不合法，合法字段为：%s' % (k, ",".join(field_list)))
+                continue
+            condition[k + "__in"] = request.GET.getlist(k)
+
         base_list_url = reverse('{0}:{1}_{2}_changelist'.format(self.site.namespace, self.app_label,
                                                                 self.model_name))
         # utl_path = request.path_info

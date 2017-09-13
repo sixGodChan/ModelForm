@@ -60,6 +60,7 @@ class FilterList(object):
                 value_list = param_dict.getlist(self.option.name)  # 获取GET请求参数
                 if val in value_list:  # 设置被选中样式
                     value_list.remove(val)
+                    param_dict.setlist(self.option.name,value_list) # 重新赋值
                     active = True
                 else:
                     param_dict.appendlist(self.option.name, val)
